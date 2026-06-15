@@ -109,6 +109,35 @@ async def cancel_download(job_id: str):
     return {"status": "cancelled"}
 
 
+@app.delete("/downloads/{job_id}/remove")
+async def remove_download(job_id: str):
+    if not scheduler.remove(job_id):
+        raise HTTPException(status_code=404, detail="Download not found")
+    return {"status": "removed"}
+
+
+class UpdateDownloadRequest(BaseModel):
+    filename: Optional[str] = None
+    priority: Optional[str] = None
+
+
+@app.patch("/downloads/{job_id}")
+async def update_download(job_id: str, req: UpdateDownloadRequest):
+    priority = priority_from_str(req.priority) if req.priority else None
+    if not scheduler.update(job_id, filename=req.filename, priority=priority):
+        raise HTTPException(status_code=404, detail="Download not found")
+    job = scheduler.get(job_id)
+    return job_to_dict(job)
+
+
+@app.post("/downloads/{job_id}/retry", status_code=201)
+async def retry_download(job_id: str):
+    new_id = scheduler.retry(job_id)
+    if not new_id:
+        raise HTTPException(status_code=400, detail="Download not found or not retryable")
+    return {"id": new_id, "status": "queued"}
+
+
 @app.get("/config")
 async def get_config():
     return config.model_dump(mode="json")

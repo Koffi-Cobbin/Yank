@@ -4,7 +4,7 @@ import { Download, Inbox } from "lucide-react";
 
 const FILTERS = ["all", "downloading", "queued", "paused", "complete", "failed"];
 
-export default function DownloadList({ downloads, filter, onFilterChange, onPause, onResume, onCancel }) {
+export default function DownloadList({ downloads, filter, onFilterChange, onPause, onResume, onCancel, onDelete, onEdit, onRetry }) {
   const filtered = downloads.filter((d) => {
     if (filter === "all") return true;
     return d.status === filter;
@@ -73,6 +73,9 @@ export default function DownloadList({ downloads, filter, onFilterChange, onPaus
             onPause={onPause}
             onResume={onResume}
             onCancel={onCancel}
+            onDelete={onDelete}
+            onEdit={onEdit}
+            onRetry={onRetry}
           />
         ))
       )}

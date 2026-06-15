@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useDownloads } from "./hooks/useDownloads.js";
 import DownloadList from "./components/DownloadList.jsx";
 import AddDownloadModal from "./components/AddDownloadModal.jsx";
+import EditDownloadModal from "./components/EditDownloadModal.jsx";
 import SettingsPanel from "./components/SettingsPanel.jsx";
 import SpeedGraph from "./components/SpeedGraph.jsx";
 import { Plus, Settings, RefreshCw, Wifi, WifiOff, Download } from "lucide-react";
@@ -9,11 +10,13 @@ import { Plus, Settings, RefreshCw, Wifi, WifiOff, Download } from "lucide-react
 export default function App() {
   const {
     downloads, loading, error, backendOnline,
-    addDownload, pauseDownload, resumeDownload, cancelDownload, refresh,
+    addDownload, pauseDownload, resumeDownload, cancelDownload,
+    deleteDownload, updateDownload, retryDownload, refresh,
   } = useDownloads(1000);
 
   const [showAdd, setShowAdd] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const [filter, setFilter] = useState("all");
   const [config, setConfig] = useState(null);
 
@@ -39,15 +42,10 @@ export default function App() {
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     const url = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain");
-    if (url && url.startsWith("http")) {
-      setShowAdd(true);
-    }
+    if (url && url.startsWith("http")) setShowAdd(true);
   }, []);
 
   const activeCount = downloads.filter((d) => d.status === "downloading").length;
-  const totalSpeed = downloads
-    .filter((d) => d.status === "downloading")
-    .reduce((s, d) => s + (d.speed_bps || 0), 0);
 
   return (
     <div
@@ -82,14 +80,12 @@ export default function App() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Connection status */}
           <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12 }}>
             {backendOnline
               ? <><Wifi size={14} color="#22c55e" /><span style={{ color: "#22c55e" }}>API online</span></>
               : <><WifiOff size={14} color="#ef4444" /><span style={{ color: "#ef4444" }}>API offline</span></>
             }
           </div>
-
           <button onClick={refresh} style={iconBtnStyle} title="Refresh">
             <RefreshCw size={15} />
           </button>
@@ -104,8 +100,7 @@ export default function App() {
               background: "#3b82f6", border: "none",
               borderRadius: 8, color: "#fff",
               fontSize: 14, fontWeight: 700,
-              cursor: "pointer",
-              transition: "background .15s",
+              cursor: "pointer", transition: "background .15s",
             }}
           >
             <Plus size={15} /> New Download
@@ -126,8 +121,7 @@ export default function App() {
           ].map((stat) => (
             <div key={stat.label} style={{
               background: "#1e293b", border: "1px solid #334155",
-              borderRadius: 10, padding: "14px 18px",
-              textAlign: "center",
+              borderRadius: 10, padding: "14px 18px", textAlign: "center",
             }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: stat.color }}>{stat.value}</div>
               <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em" }}>{stat.label}</div>
@@ -138,7 +132,7 @@ export default function App() {
         {/* Speed graph */}
         <SpeedGraph downloads={downloads} />
 
-        {/* Error notice */}
+        {/* Backend offline notice */}
         {!backendOnline && (
           <div style={{
             background: "#450a0a", border: "1px solid #ef444440",
@@ -164,6 +158,9 @@ export default function App() {
           onPause={pauseDownload}
           onResume={resumeDownload}
           onCancel={cancelDownload}
+          onDelete={deleteDownload}
+          onEdit={(download) => setEditTarget(download)}
+          onRetry={retryDownload}
         />
       </main>
 
@@ -171,6 +168,14 @@ export default function App() {
         <AddDownloadModal
           onAdd={addDownload}
           onClose={() => setShowAdd(false)}
+        />
+      )}
+
+      {editTarget && (
+        <EditDownloadModal
+          download={editTarget}
+          onSave={updateDownload}
+          onClose={() => setEditTarget(null)}
         />
       )}
 
@@ -189,6 +194,5 @@ const iconBtnStyle = {
   width: 34, height: 34,
   display: "flex", alignItems: "center", justifyContent: "center",
   background: "#0f172a", border: "1px solid #334155",
-  borderRadius: 7, color: "#94a3b8",
-  cursor: "pointer",
+  borderRadius: 7, color: "#94a3b8", cursor: "pointer",
 };

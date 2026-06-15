@@ -57,6 +57,27 @@ export function useDownloads(pollIntervalMs = 1000) {
     await fetchDownloads();
   }, [fetchDownloads]);
 
+  const deleteDownload = useCallback(async (id) => {
+    await fetch(`${API_BASE}/downloads/${id}/remove`, { method: "DELETE" });
+    await fetchDownloads();
+  }, [fetchDownloads]);
+
+  const updateDownload = useCallback(async (id, { filename, priority }) => {
+    const res = await fetch(`${API_BASE}/downloads/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename, priority }),
+    });
+    if (!res.ok) throw new Error(`Failed to update: HTTP ${res.status}`);
+    await fetchDownloads();
+  }, [fetchDownloads]);
+
+  const retryDownload = useCallback(async (id) => {
+    const res = await fetch(`${API_BASE}/downloads/${id}/retry`, { method: "POST" });
+    if (!res.ok) throw new Error(`Failed to retry: HTTP ${res.status}`);
+    await fetchDownloads();
+  }, [fetchDownloads]);
+
   return {
     downloads,
     loading,
@@ -66,6 +87,9 @@ export function useDownloads(pollIntervalMs = 1000) {
     pauseDownload,
     resumeDownload,
     cancelDownload,
+    deleteDownload,
+    updateDownload,
+    retryDownload,
     refresh: fetchDownloads,
   };
 }

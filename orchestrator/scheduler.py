@@ -88,6 +88,37 @@ class Scheduler:
             return True
         return False
 
+    def remove(self, job_id: str) -> bool:
+        job = self.get(job_id)
+        if not job:
+            return False
+        self._active.pop(job_id, None)
+        self._completed.pop(job_id, None)
+        self._queue = deque(j for j in self._queue if j.job_id != job_id)
+        return True
+
+    def update(self, job_id: str, filename: Optional[str] = None, priority: Optional[Priority] = None) -> bool:
+        job = self.get(job_id)
+        if not job:
+            return False
+        if filename is not None:
+            job.filename = filename
+        if priority is not None:
+            job.priority = priority
+        return True
+
+    def retry(self, job_id: str) -> Optional[str]:
+        job = self.get(job_id)
+        if not job or job.status not in (JobStatus.FAILED, JobStatus.CANCELLED):
+            return None
+        new_job = DownloadJob(
+            url=job.url,
+            filename=job.filename,
+            priority=job.priority,
+        )
+        self._completed.pop(job_id, None)
+        return self.add(new_job)
+
     async def run(self) -> None:
         while True:
             async with self._lock:
