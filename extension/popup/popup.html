@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yank</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 280px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #111827;
+      color: #f9fafb;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .logo { font-size: 22px; font-weight: 800; color: #3b82f6; }
+    .tagline { font-size: 11px; color: #6b7280; }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1f2937;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .toggle-label { font-size: 13px; }
+    .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: #374151;
+      border-radius: 22px;
+      transition: .3s;
+      cursor: pointer;
+    }
+    .slider:before {
+      content: "";
+      position: absolute;
+      width: 16px; height: 16px;
+      left: 3px; bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: .3s;
+    }
+    input:checked + .slider { background: #3b82f6; }
+    input:checked + .slider:before { transform: translateX(18px); }
+    .add-section { margin-bottom: 12px; }
+    .add-section input {
+      width: 100%;
+      padding: 8px 10px;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      color: #f9fafb;
+      font-size: 12px;
+      margin-bottom: 6px;
+      outline: none;
+    }
+    .add-section input:focus { border-color: #3b82f6; }
+    .btn {
+      width: 100%;
+      padding: 8px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn:hover { background: #2563eb; }
+    .btn:disabled { background: #374151; cursor: not-allowed; }
+    .status { font-size: 11px; color: #6b7280; text-align: center; margin-top: 8px; }
+    .status.ok { color: #10b981; }
+    .status.err { color: #ef4444; }
+    .open-btn {
+      width: 100%;
+      padding: 7px;
+      background: transparent;
+      color: #3b82f6;
+      border: 1px solid #3b82f6;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .open-btn:hover { background: #1d4ed8; color: white; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">Yank</div>
+    <div class="tagline">High-performance download manager</div>
+  </div>
+
+  <div class="toggle-row">
+    <span class="toggle-label">Intercept downloads</span>
+    <label class="switch">
+      <input type="checkbox" id="enabledToggle" checked />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="add-section">
+    <input type="url" id="urlInput" placeholder="Paste URL to download…" />
+    <button class="btn" id="addBtn">Add to Yank</button>
+  </div>
+
+  <div id="statusMsg" class="status"></div>
+  <button class="open-btn" id="openAppBtn">Open Yank App</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
