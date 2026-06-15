@@ -19,6 +19,14 @@ author = "agent"
 task = "workflow.run"
 args = "Start application"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Python Orchestrator"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "C++ Engine"
+
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -31,9 +39,36 @@ waitForPort = 5000
 [workflows.workflow.metadata]
 outputType = "webview"
 
+[[workflows.workflow]]
+name = "Python Orchestrator"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd orchestrator && python main.py"
+
+[[workflows.workflow]]
+name = "C++ Engine"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "engine/build/yank_engine 6800"
+waitForPort = 6800
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 6800
+externalPort = 6800
 
 [deployment]
 deploymentTarget = "static"
